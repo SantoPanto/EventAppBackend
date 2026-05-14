@@ -3,6 +3,7 @@ package com.works.controller;
 import com.works.dto.CustomerLoginRequestDto;
 import com.works.dto.CustomerRegisterRequestDto;
 import com.works.service.CustomerService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -15,14 +16,22 @@ public class CustomerRestController {
 
     private final CustomerService customerService;
 
+    @PostMapping("/login")
+    public ResponseEntity login(@Valid @RequestBody CustomerLoginRequestDto dto, HttpServletRequest request) {
+        ResponseEntity response = customerService.login(dto);
+
+        // Eğer giriş başarılıysa
+        if (response.getStatusCode().is2xxSuccessful()) {
+            // Kullanıcı bilgilerini Session'a kaydediyoruz
+            request.getSession().setAttribute("customer", response.getBody());
+        }
+
+        return response;
+    }
+
     @PostMapping("/register")
     public ResponseEntity register(@Valid @RequestBody CustomerRegisterRequestDto dto) {
         return customerService.register(dto);
-    }
-
-    @PostMapping("/login")
-    public ResponseEntity login(@Valid @RequestBody CustomerLoginRequestDto dto) {
-        return customerService.login(dto);
     }
 
     @GetMapping("/logout")
