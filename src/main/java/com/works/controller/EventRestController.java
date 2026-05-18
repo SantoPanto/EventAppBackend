@@ -2,6 +2,7 @@ package com.works.controller;
 
 import com.works.dto.EventCreateRequestDto;
 import com.works.dto.EventResponseDto;
+import com.works.dto.EventUpdateRequestDto;
 import com.works.service.EventService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -57,5 +58,11 @@ public class EventRestController {
     )
     {
         return eventService.search(q, page, daySort);
+    }
+
+    // Etkinlik Güncelleme
+    @PutMapping("/update")
+    public ResponseEntity update(@Valid @RequestBody EventUpdateRequestDto dto) {
+        return eventService.update(dto);
     }
 }

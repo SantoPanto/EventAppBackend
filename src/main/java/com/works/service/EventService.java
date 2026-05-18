@@ -2,6 +2,7 @@ package com.works.service;
 
 import com.works.dto.EventCreateRequestDto;
 import com.works.dto.EventResponseDto;
+import com.works.dto.EventUpdateRequestDto;
 import com.works.entity.Event;
 import com.works.repository.EventRepository;
 import lombok.RequiredArgsConstructor;
@@ -127,6 +128,37 @@ public class EventService {
             return ResponseEntity.ok().body(hm);
         } else {
             Map<String, Object> hm = Map.of("success", false, "message", "Event not found id: " + eid);
+            return ResponseEntity.status(404).body(hm);
+        }
+    }
+
+    // Etkinlik Güncelleme (Update)
+    @CacheEvict(cacheNames = "eventListCache", allEntries = true)
+    public ResponseEntity update(EventUpdateRequestDto eventUpdateRequestDto) {
+        // 1. Veritabanında bu ID'ye sahip bir etkinlik var mı?
+        Optional<Event> optionalEvent = eventRepository.findById(eventUpdateRequestDto.getEid());
+
+        if (optionalEvent.isPresent()) {
+
+            // --- GÜVENLİK KURALI: Geçmiş saat kontrolü ---
+            LocalDate today = LocalDate.now();
+            LocalTime now = LocalTime.now();
+            if (eventUpdateRequestDto.getDate().isEqual(today) && eventUpdateRequestDto.getTime().isBefore(now)) {
+                Map<String, Object> hm = Map.of("success", false, "message", "Bugünün tarihini seçtiyseniz, geçmiş bir saat giremezsiniz!");
+                return ResponseEntity.badRequest().body(hm);
+            }
+            // ----------------------------------------------
+
+            // DTO'yu Entity'ye çevirip veritabanında üzerine yazıyoruz
+            Event event = model.map(eventUpdateRequestDto, Event.class);
+            eventRepository.save(event);
+
+            Map<String, Object> hm = Map.of("success", true, "message", "Event updated successfully.");
+            return ResponseEntity.ok().body(hm);
+
+        } else {
+            // Kayıt bulunamazsa 404 dön
+            Map<String, Object> hm = Map.of("success", false, "message", "Event not found id: " + eventUpdateRequestDto.getEid());
             return ResponseEntity.status(404).body(hm);
         }
     }
