@@ -23,6 +23,13 @@ public class SessionFilter implements Filter {
 
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
+        
+        // Eğer istek OPTIONS ise (Preflight), kontrol yapmadan doğrudan izin ver
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            filterChain.doFilter(servletRequest, servletResponse);
+            return;
+        }
+        // -------------------
 
         String urlPath = request.getRequestURI();
 

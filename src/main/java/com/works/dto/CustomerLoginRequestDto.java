@@ -1,5 +1,6 @@
 package com.works.dto;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -16,9 +17,9 @@ import java.io.Serializable;
 @Data
 public class CustomerLoginRequestDto {
     @NotNull
+    @Email
     @NotEmpty
-    @Size(min = 5, max = 100)
-    String username;
+    String email;
     @NotNull
     @Size(min = 6, max = 15)
     @NotEmpty

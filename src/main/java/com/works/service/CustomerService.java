@@ -29,11 +29,15 @@ public class CustomerService {
     public ResponseEntity register(CustomerRegisterRequestDto customerRegisterRequestDto){
         List<Customer> customerList = customerRepository.findByEmailEqualsOrPhoneEqualsAllIgnoreCase(customerRegisterRequestDto.getEmail(), customerRegisterRequestDto.getPhone());
         if(customerList.size() > 0){
-            // daha önceden bu email veya phone kullanılmış demektir.
             Map<String, Object> hm = Map.of("success", false, "message", "This email or phone number is already in use.");
             return ResponseEntity.badRequest().body(hm);
         }
+
         Customer customer = model.map(customerRegisterRequestDto, Customer.class);
+
+        // BURAYI EKLE: Kullanıcıyı aktif et
+        customer.setEnabled(true);
+
         String hashPassword = BCrypt.hashpw(customer.getPassword(), BCrypt.gensalt());
         customer.setPassword(hashPassword);
         customerRepository.save(customer);
@@ -42,8 +46,9 @@ public class CustomerService {
 
     // login
     public ResponseEntity login(CustomerLoginRequestDto customerLoginRequestDto){
+        System.out.println("Session ID: " + request.getSession().getId());
         System.out.println("CustomerService - " +  model.hashCode());
-        Optional<Customer> optionalCustomer = customerRepository.findByEnabledTrueAndEmailIgnoreCaseOrEnabledTrueAndPhoneIgnoreCase(customerLoginRequestDto.getUsername(), customerLoginRequestDto.getUsername());
+        Optional<Customer> optionalCustomer = customerRepository.findByEnabledTrueAndEmailIgnoreCaseOrEnabledTrueAndPhoneIgnoreCase(customerLoginRequestDto.getEmail(), customerLoginRequestDto.getEmail());
         if(optionalCustomer.isPresent()){
             Customer customer = optionalCustomer.get();
             boolean isMatch = BCrypt.checkpw(customerLoginRequestDto.getPassword(), customer.getPassword());
