@@ -112,4 +112,11 @@ public class ParticipationService {
 
         return ResponseEntity.ok().body(participantDtos);
     }
+
+    // Katılımcı Sayısını Getir (Herkese Açık)
+    public ResponseEntity<?> getParticipantCount(Integer eventId) {
+        // Zaten var olan findByEventEid metodunu kullanarak sayıyı alıyoruz
+        List<Participation> list = participationRepository.findByEventEid(eventId);
+        return ResponseEntity.ok().body(Map.of("success", true, "count", list.size()));
+    }
 }

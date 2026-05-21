@@ -37,9 +37,12 @@ public class SessionFilter implements Filter {
         String[] freeUrls = {
                 "/customer/login",
                 "/customer/register",
-                "/h2-console",       // Veritabanı yönetim ekranı
-                "/v3/api-docs",      // Swagger JSON verisi
-                "/swagger-ui"        // Swagger Arayüzü
+                "/h2-console",
+                "/v3/api-docs",
+                "/swagger-ui",
+                "/event/list",          // 🌟 Herkes tüm etkinlikleri görebilsin
+                "/event/detail",        // 🌟 Herkes etkinliğin detayına bakabilsin
+                "/participation/count"  // 🌟 Herkes katılımcı sayısını görebilsin
         };
 
         boolean isAuth = true;

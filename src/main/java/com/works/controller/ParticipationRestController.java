@@ -26,4 +26,10 @@ public class ParticipationRestController {
     public ResponseEntity getParticipants(@PathVariable Integer eventId, HttpServletRequest request) {
         return participationService.getParticipants(eventId, request);
     }
+
+    // Etkinlik Katılımcı Sayısı (Herkese Açık)
+    @GetMapping("/count/{eventId}")
+    public ResponseEntity<?> getParticipantCount(@PathVariable Integer eventId) {
+        return participationService.getParticipantCount(eventId);
+    }
 }

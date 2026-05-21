@@ -102,7 +102,7 @@ public class EventService {
     // 📄 Sayfalı Listeleme (Sadece PUBLISHED durumundaki açık etkinlikleri getirir)
     public Page<EventResponseDto> list(int page) {
         Sort sort = Sort.by(Sort.Direction.DESC, "eid");
-        Pageable pageable = PageRequest.of(page, 10, sort);
+        Pageable pageable = PageRequest.of(page, 9, sort);
 
         // Ziyaretçiler ve diğer kullanıcılar sadece YAYINDA olanları görebilir
         return eventRepository.findByStatus(EventStatus.PUBLISHED, pageable)
@@ -112,7 +112,7 @@ public class EventService {
     // 🔍 Sayfalı ve Sıralamalı Arama (Yalnızca PUBLISHED olanlar içinde arar)
     public Page<EventResponseDto> search(String q, int page, String daySort) {
         Sort sort = daySort.equalsIgnoreCase("asc") ? Sort.by("date").ascending() : Sort.by("date").descending();
-        Pageable pageable = PageRequest.of(page, 10, sort);
+        Pageable pageable = PageRequest.of(page, 9, sort);
 
         return eventRepository.findByStatusAndNameContainingIgnoreCaseOrStatusAndDescriptionContainingIgnoreCase(
                         EventStatus.PUBLISHED, q, EventStatus.PUBLISHED, q, pageable)
