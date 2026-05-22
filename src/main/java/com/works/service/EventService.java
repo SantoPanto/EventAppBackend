@@ -7,8 +7,10 @@ import com.works.dto.EventUpdateRequestDto;
 import com.works.entity.Customer;
 import com.works.entity.Event;
 import com.works.entity.EventStatus;
+import com.works.entity.Participation;
 import com.works.repository.CustomerRepository;
 import com.works.repository.EventRepository;
+import com.works.repository.ParticipationRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -34,6 +37,7 @@ public class EventService {
 
     private final EventRepository eventRepository;
     private final CustomerRepository customerRepository; // Oturum açan kullanıcıyı doğrulamak için ekledik
+    private final ParticipationRepository participationRepository;
     private final ModelMapper model;
 
     //  YARDIMCI METOT: O an Session'da login olan kullanıcıyı bulur
@@ -150,6 +154,7 @@ public class EventService {
     }
 
     // ❌ Etkinlik Silme (Delete - Sadece Sahibi Silebilir)
+    @Transactional
     public ResponseEntity deleteOne(Integer eid, HttpServletRequest request) {
         Optional<Event> optionalEvent = eventRepository.findById(eid);
         if (optionalEvent.isEmpty()) {
@@ -164,8 +169,15 @@ public class EventService {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("success", false, "message", "Yetkisiz işlem! Sadece kendi etkinliğinizi silebilirsiniz."));
         }
 
+        // 🌟 ÇÖZÜM BURADA: Etkinliği silmeden önce ona bağlı olan tüm katılım kayıtlarını siliyoruz!
+        // Not: Eğer repo metodunun adı findByEventId ise ona göre değiştir. (Önceki adımlarda findByEventEid olarak oluşturmuştuk)
+        List<Participation> participations = participationRepository.findByEventEid(eid);
+        participationRepository.deleteAll(participations);
+
+        // Katılım kayıtları temizlendikten sonra etkinliğin kendisini güvenle silebiliriz
         eventRepository.deleteById(eid);
-        return ResponseEntity.ok().body(Map.of("success", true, "message", "Event deleted successfully."));
+
+        return ResponseEntity.ok().body(Map.of("success", true, "message", "Etkinlik başarıyla silindi."));
     }
 
     // ⚙️ ENUM STATÜ GÜNCELLEME (Publish, Unpublish, Archive işlemlerini tek elden çözer)
